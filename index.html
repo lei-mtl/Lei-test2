@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【5天4夜】東京之旅 - 行程與費用追蹤</title>
+    <style>
+        /* --- Itinerary & General Styles (Inherited from your code) --- */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 900px; /* Increased max-width for better tracker layout */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h1 {
+            color: #d9534f;
+            border-bottom: 3px solid #d9534f;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h2 {
+            color: #5bc0de;
+            margin-top: 25px;
+            border-left: 5px solid #5bc0de;
+            padding-left: 10px;
+        }
+        .day {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .day strong {
+            display: block;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .note {
+            background-color: #d9edf7;
+            border: 1px solid #bce8f1;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            color: #31708f;
+        }
+        .note p {
+            margin: 5px 0;
+        }
+
+        /* --- Expense Tracker Styles --- */
+        #expense-tracker {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        #expense-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 100px; /* Item, Amount, Payer, Button */
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        #expense-form input, #expense-form select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        #expense-form button {
+            background-color: #28a745; /* Green button */
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        #expense-form button:hover {
+            background-color: #218838;
+        }
+        
+        /* Tables */
+        .expense-table, .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .expense-table th, .expense-table td, 
+        .report-table th, .report-table td {
+            border: 1px solid #eee;
+            padding: 12px;
+        }
+        .expense-table th, .report-table th {
+            background-color: #f8f8f8;
+            color: #333;
+            font-weight: bold;
+        }
+        .expense-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        /* Report Summary */
+        .report-table .positive {
+            color: #28a745; /* Green for "Owes" */
+            font-weight: bold;
+        }
+        .report-table .negative {
+            color: #d9534f; /* Red for "Is Owed" */
+            font-weight: bold;
+        }
+        .report-table tr.total-row td {
+            font-weight: bold;
+            background-color: #e9ecef;
+            border-top: 2px solid #5bc0de;
+        }
+
+        /* For mobile */
+        @media (max-width: 600px) {
+            #expense-form {
+                grid-template-columns: 1fr; /* Stack inputs vertically on small screens */
+            }
+            #expense-form button {
+                grid-column: 1; /* Make button full width */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✈️ 【5天4夜】東京之旅行程</h1>
+
+    <div class="day">
+        <h2>Day 1: 抵達與展望</h2>
+        <strong>機場 → 飯店 Check-in → 晴空塔</strong>
+        <ul>
+            <li>由 羽田機場／成田機場 抵達東京市區</li>
+            <li>飯店 Check in</li>
+            <li>**晴空塔**（購物、晚餐、賞夜景）</li>
+        </ul>
+    </div>
+
+    <div class="day">
+        <h2>Day 2: 傳統與潮流 (銀座線高效遊)</h2>
+        <strong>淺草 → 秋葉原 → 銀座</strong>
+        <ul>
+            <li>**淺草**（雷門、仲見世通商店街、淺草寺）</li>
+            <li>**秋葉原電器街**</li>
+            <li>**銀座**（逛街、下午茶或用餐）</li>
+        </ul>
+    </div>
+
+    <div class="day">
+        <h2>Day 3: 新宿一日遊</h2>
+        <strong>休閒、購物與娛樂</strong>
+        <ul>
+            <li>**新宿御苑**野餐</li>
+            <li>**伊勢丹百貨**</li>
+            <li>**新宿東口3D貓**</li>
+            <li>**新宿花園神社**</li>
+            <li>**東急歌舞伎町TOWER**</li>
+        </ul>
+    </div>
+
+    <div class="day">
+        <h2>Day 4: 市場、藝術與歷史</h2>
+        <strong>海鮮、光影與皇室</strong>
+        <ul>
+            <li>**豐洲市場**</li>
+            <li>**teamLab Planets TOKYO**</li>
+            <li>**東京車站**（用餐、購物）</li>
+            <li>**皇居外苑散策**</li>
+            <li>**東京鐵塔**</li>
+        </ul>
+    </div>
+
+    <div class="day">
+        <h2>Day 5: 賦歸</h2>
+        <strong>機場購物</strong>
+        <ul>
+            <li>由 羽田機場／成田機場 回程。</li>
+            <li>**推薦：** 提早到機場購物用餐。</li>
+        </ul>
+    </div>
+
+    <h2>行程重點提醒 (Memo)</h2>
+    <div class="note">
+        <p>・5天玩東京會較為緊湊，部分景點可採重點式遊覽。不過依然提醒大家，景點之間依然要保留休息空檔唷。</p>
+        <p>・**交通提醒：** Day 2 可善用**東京Metro「銀座線」**：淺草 → 末廣町 (秋葉原商圈) → 銀座。</p>
+        <p>・**家庭友善：** Day 3 規劃了「新宿一日遊」，很適合一家大小玩上一整天！</p>
+        <p>・**原始參考網址：** <a href="https://tokyo.letsgojp.com/archives/301458/" target="_blank">樂吃購！日本 (點擊開啟)</a></p>
+    </div>
+
+    <div id="expense-tracker">
+        <h2>💰 共同費用追蹤</h2>
+
+        <div>
+            <label for="participants-input">**設定參與者 (以逗號或分號分隔, 如: A, B, C):**</label>
+            <input type="text" id="participants-input" placeholder="小明, 小華, 小美" style="width: 100%; margin: 5px 0 15px 0; padding: 10px;">
+            <button onclick="updateParticipants()">✅ 確認參與者</button>
+            <p id="participant-status" style="margin-top: 10px; font-weight: bold; color: #5cb85c;">請先設定參與者</p>
+        </div>
+        <hr style="margin: 20px 0;">
+
+        <h3>新增費用項目</h3>
+        <div id="expense-form">
+            <input type="text" id="expense-item" placeholder="費用項目 (e.g. 晴空塔門票)" required>
+            <input type="number" id="expense-amount" placeholder="金額 (JPY)" min="1" required>
+            <select id="expense-payer">
+                </select>
+            <button onclick="addExpense()">新增</button>
+        </div>
+
+        <h3>所有費用列表</h3>
+        <table class="expense-table">
+            <thead>
+                <tr>
+                    <th>項目</th>
+                    <th>金額 (JPY)</th>
+                    <th>支付人</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="expense-list">
+                </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="1">總共同花費</td>
+                    <td id="total-expense" colspan="3">0 JPY</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <h2 style="margin-top: 30px;">📊 費用結算報告</h2>
+        <p><strong>人均應付金額 (Per Person Share):</strong> <span id="per-person-share">0 JPY</span></p>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>參與者</th>
+                    <th>總支出</th>
+                    <th>應付份額</th>
+                    <th>餘額 (Owes / Is Owed)</th>
+                </tr>
+            </thead>
+            <tbody id="report-summary">
+                </tbody>
+        </table>
+
+        <h3 style="margin-top: 30px;">💸 結算建議 (Who Owes Whom)</h3>
+        <ul id="settlement-advice" style="list-style-type: none; padding-left: 0;">
+             <li><em>請先新增費用項目...</em></li>
+        </ul>
+    </div>
+
+    <div class="scroll-spacer" style="height: 100px;"></div>
+
+    <script>
+        let expenses = [];
+        let participants = [];
+
+        // --- Participant Management ---
+        function updateParticipants() {
+            const input = document.getElementById('participants-input').value.trim();
+            if (input) {
+                // Split by comma or semicolon, trim whitespace, and filter out empty strings
+                participants = input.split(/[,;]/).map(p => p.trim()).filter(p => p.length > 0);
+                
+                // Update dropdown and status
+                updatePayerDropdown();
+                document.getElementById('participant-status').textContent = `✅ 參與者已設定: ${participants.join(', ')}`;
+                document.getElementById('participant-status').style.color = '#5cb85c';
+            } else {
+                participants = [];
+                document.getElementById('participant-status').textContent = `❌ 請輸入參與者名稱`;
+                document.getElementById('participant-status').style.color = '#d9534f';
+            }
+            // Recalculate everything after updating participants
+            renderExpenses();
+            generateReport();
+        }
+
+        function updatePayerDropdown() {
+            const dropdown = document.getElementById('expense-payer');
+            dropdown.innerHTML = ''; // Clear existing options
+            if (participants.length === 0) {
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '請先設定參與者';
+                dropdown.appendChild(defaultOption);
+                dropdown.disabled = true;
+                return;
+            }
+            dropdown.disabled = false;
+            participants.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p;
+                option.textContent = p;
+                dropdown.appendChild(option);
+            });
+        }
+
+        // --- Expense Management ---
+        function addExpense() {
+            const item = document.getElementById('expense-item').value;
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const payer = document.getElementById('expense-payer').value;
+
+            if (!item || isNaN(amount) || amount <= 0 || !payer) {
+                alert('請填寫所有欄位並確保金額有效！');
+                return;
+            }
+            
+            if (participants.length === 0) {
+                 alert('請先設定參與者！');
+                 return;
+            }
+
+            expenses.push({ item, amount, payer });
+
+            // Clear form
+            document.getElementById('expense-item').value = '';
+            document.getElementById('expense-amount').value = '';
+
+            renderExpenses();
+            generateReport();
+        }
+
+        function deleteExpense(index) {
+            if (confirm(`確定要刪除項目 "${expenses[index].item}" 嗎？`)) {
+                expenses.splice(index, 1);
+                renderExpenses();
+                generateReport();
+            }
+        }
+
+        function renderExpenses() {
+            const listBody = document.getElementById('expense-list');
+            listBody.innerHTML = '';
+            let total = 0;
+
+            expenses.forEach((exp, index) => {
+                total += exp.amount;
+                const row = listBody.insertRow();
+                row.insertCell().textContent = exp.item;
+                row.insertCell().textContent = exp.amount.toLocaleString('ja-JP'); // Format as JPY
+                row.insertCell().textContent = exp.payer;
+                
+                const deleteCell = row.insertCell();
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '刪除';
+                deleteButton.onclick = () => deleteExpense(index);
+                deleteButton.style.cssText = 'background-color: #f0ad4e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;';
+                deleteCell.appendChild(deleteButton);
+            });
+
+            document.getElementById('total-expense').textContent = `${total.toLocaleString('ja-JP')} JPY`;
+        }
+
+        // --- Report Generation ---
+        function generateReport() {
+            const reportBody = document.getElementById('report-summary');
+            const settlementList = document.getElementById('settlement-advice');
+            reportBody.innerHTML = '';
+            settlementList.innerHTML = '';
+
+            if (participants.length === 0 || expenses.length === 0) {
+                 settlementList.innerHTML = '<li><em>請先設定參與者並新增費用項目...</em></li>';
+                 document.getElementById('per-person-share').textContent = '0 JPY';
+                 return;
+            }
+
+            const totalExpense = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const perPersonShare = totalExpense / participants.length;
+            document.getElementById('per-person-share').textContent = `${perPersonShare.toFixed(2).toLocaleString('ja-JP')} JPY`;
+
+            const participantData = {};
+            participants.forEach(p => {
+                participantData[p] = { totalPaid: 0, balance: 0 };
+            });
+
+            // 1. Calculate Total Paid by each person
+            expenses.forEach(exp => {
+                if (participantData[exp.payer]) {
+                    participantData[exp.payer].totalPaid += exp.amount;
+                }
+            });
+
+            // 2. Calculate Balance (Paid - Share)
+            participants.forEach(p => {
+                const paid = participantData[p].totalPaid;
+                const balance = paid - perPersonShare;
+                participantData[p].balance = balance;
+
+                const row = reportBody.insertRow();
+                row.insertCell().textContent = p;
+                row.insertCell().textContent = paid.toLocaleString('ja-JP');
+                row.insertCell().textContent = perPersonShare.toFixed(2).toLocaleString('ja-JP');
+                
+                const balanceCell = row.insertCell();
+                balanceCell.textContent = balance.toFixed(2).toLocaleString('ja-JP');
+                
+                if (balance > 0) {
+                    balanceCell.classList.add('positive'); // Is owed money
+                    balanceCell.textContent = `+${balanceCell.textContent}`;
+                } else if (balance < 0) {
+                    balanceCell.classList.add('negative'); // Owes money
+                } else {
+                     balanceCell.textContent = '0.00';
+                }
+            });
+
+            // 3. Generate Settlement Advice
+            const balances = Object.entries(participantData).map(([name, data]) => ({ name, balance: data.balance }));
+            const givers = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance); // Is owed (Paid more)
+            const takers = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance); // Owes (Paid less)
+
+            settlementList.innerHTML = ''; // Clear previous advice
+            let totalSettled = 0;
+
+            while (givers.length > 0 && takers.length > 0) {
+                const giver = givers[0];
+                const taker = takers[0];
+                
+                // Note: Use absolute value for what the taker owes
+                const amountToSettle = Math.min(giver.balance, Math.abs(taker.balance)); 
+                
+                if (amountToSettle > 0.01) { // Only record significant transactions
+                    totalSettled += amountToSettle;
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `👉 ${taker.name} 應支付 ${giver.name} ${amountToSettle.toFixed(2).toLocaleString('ja-JP')} JPY`;
+                    listItem.style.marginBottom = '5px';
+                    settlementList.appendChild(listItem);
+                }
+
+                // Update balances
+                giver.balance -= amountToSettle;
+                taker.balance += amountToSettle; // Taker's balance is negative, adding settlement reduces its magnitude.
+
+                // Remove settled parties
+                if (giver.balance <= 0.01) { givers.shift(); }
+                if (taker.balance >= -0.01) { takers.shift(); } // Check for near-zero negative
+            }
+            
+             if (totalSettled === 0) {
+                settlementList.innerHTML = '<li><em>所有款項已結清或尚無費用紀錄。</em></li>';
+             }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateParticipants(); // Initialize participants (will show "Please set")
+            renderExpenses();
+            generateReport();
+        }
+
+    </script>
+</body>
+</html>
