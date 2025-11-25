@@ -226,7 +226,7 @@
 
     <div class="scroll-spacer" style="height: 100px;"></div>
 
-    <script type="module">
+  <script type="module">
         // 1. Import Firebase Functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
@@ -236,6 +236,7 @@
             deleteDoc,
             doc,
             setDoc,
+            getDoc,
             onSnapshot,
             query,
             orderBy,
@@ -243,21 +244,28 @@
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // --- ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️ ---
-         const firebaseConfig = {
-                  apiKey: "AIzaSyAjYFnlRMwv6xkzPabHceDrK0dZkSFzDTw",
-                  authDomain: "lei-test2.firebaseapp.com",
-                  projectId: "lei-test2",
-                  storageBucket: "lei-test2.firebasestorage.app",
-                  messagingSenderId: "765250762794",
-                  appId: "1:765250762794:web:adfaf00ac6586ee91deb53",
-                  measurementId: "G-F3RX6MS2GD"
-                };
-
+        const firebaseConfig = {
+  apiKey: "AIzaSyAjYFnlRMwv6xkzPabHceDrK0dZkSFzDTw",
+  authDomain: "lei-test2.firebaseapp.com",
+  projectId: "lei-test2",
+  storageBucket: "lei-test2.firebasestorage.app",
+  messagingSenderId: "765250762794",
+  appId: "1:765250762794:web:adfaf00ac6586ee91deb53",
+  measurementId: "G-F3RX6MS2GD"
+        };
         // ----------------------------------------------
 
         // 2. Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // Error handling for initialization
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            console.log("Firebase initialized successfully");
+        } catch (e) {
+            document.getElementById('participant-status').textContent = `❌ Config Error: Check console`;
+            console.error("Firebase Init Error:", e);
+        }
 
         // Global Variables
         let expenses = [];
@@ -265,56 +273,76 @@
 
         // --- A. Sync Participants Logic ---
         
-        // Listen to "settings/general" document for participant changes
         const settingsRef = doc(db, "settings", "general");
+        const statusText = document.getElementById('participant-status');
         
-        onSnapshot(settingsRef, (docSnap) => {
-            if (docSnap.exists()) {
-                participants = docSnap.data().names || [];
-                // Update the input box to match cloud data
-                document.getElementById('participants-input').value = participants.join(', ');
-                updateUIState();
-            } else {
-                participants = [];
-                updateUIState();
+        // Listener with Error Handling
+        onSnapshot(settingsRef, 
+            (docSnap) => {
+                // Success Callback
+                if (docSnap.exists()) {
+                    participants = docSnap.data().names || [];
+                    document.getElementById('participants-input').value = participants.join(', ');
+                    updateUIState();
+                } else {
+                    // Document doesn't exist yet (New Database)
+                    console.log("Settings document not found. Ready to create.");
+                    participants = [];
+                    updateUIState();
+                }
+            },
+            (error) => {
+                // ❌ ERROR Callback (This fixes the "Stuck Loading" issue)
+                console.error("Firestore Read Error:", error);
+                
+                if (error.code === 'permission-denied') {
+                    statusText.textContent = "❌ 權限錯誤: 請檢查 Firebase Rules";
+                    statusText.style.color = "red";
+                } else {
+                    statusText.textContent = `❌ 連線錯誤: ${error.code}`;
+                    statusText.style.color = "red";
+                }
             }
-        });
+        );
 
-        // Function to Write Participants to Cloud (Attached to Window for HTML button)
+        // Function to Write Participants to Cloud
         window.updateParticipants = async function() {
             const input = document.getElementById('participants-input').value.trim();
+            statusText.textContent = "⏳ 正在儲存...";
+            
             if (input) {
                 const names = input.split(/[,;]/).map(p => p.trim()).filter(p => p.length > 0);
                 try {
-                    await setDoc(settingsRef, { names: names });
+                    // We use setDoc with {merge: true} so we don't overwrite other settings if added later
+                    await setDoc(settingsRef, { names: names }, { merge: true });
                     alert("參與者名單已同步至雲端！");
                 } catch (e) {
                     console.error("Error saving participants: ", e);
-                    alert("儲存失敗，請檢查網路或 API Key");
+                    alert(`儲存失敗: ${e.message}`);
+                    statusText.textContent = "❌ 儲存失敗";
                 }
             } else {
                 alert("請輸入參與者名稱");
+                updateUIState(); // Reset text
             }
         };
 
         // --- B. Sync Expenses Logic ---
 
-        // Listen to "expenses" collection (Real-time!)
         const q = query(collection(db, "expenses"), orderBy("timestamp", "asc"));
         
         onSnapshot(q, (snapshot) => {
             expenses = [];
             snapshot.forEach((doc) => {
-                // We add the document ID so we can delete it later
                 expenses.push({ id: doc.id, ...doc.data() });
             });
-            
-            // Whenever data changes, redraw everything
             renderExpenses();
             generateReport();
+        }, (error) => {
+             console.error("Expenses Sync Error:", error);
         });
 
-        // Function to Add Expense to Cloud
+        // Function to Add Expense
         window.addExpense = async function() {
             const item = document.getElementById('expense-item').value;
             const amount = parseFloat(document.getElementById('expense-amount').value);
@@ -326,23 +354,32 @@
             }
 
             try {
+                const btn = document.querySelector('#expense-form button');
+                const oldText = btn.textContent;
+                btn.textContent = "傳送中...";
+                btn.disabled = true;
+
                 await addDoc(collection(db, "expenses"), {
                     item: item,
                     amount: amount,
                     payer: payer,
-                    timestamp: serverTimestamp() // Helps sort them in order
+                    timestamp: serverTimestamp()
                 });
                 
                 // Clear form
                 document.getElementById('expense-item').value = '';
                 document.getElementById('expense-amount').value = '';
+                
+                btn.textContent = oldText;
+                btn.disabled = false;
             } catch (e) {
                 console.error("Error adding expense: ", e);
-                alert("新增失敗");
+                alert("新增失敗: " + e.message);
+                document.querySelector('#expense-form button').disabled = false;
             }
         };
 
-        // Function to Delete Expense from Cloud
+        // Function to Delete Expense
         window.deleteExpense = async function(docId) {
             if (confirm(`確定要刪除此項目嗎？`)) {
                 try {
@@ -354,25 +391,23 @@
             }
         };
 
-
-        // --- C. Rendering & Logic (Similar to your original code) ---
+        // --- C. Rendering & Logic ---
 
         function updateUIState() {
             updatePayerDropdown();
             if(participants.length > 0) {
-                document.getElementById('participant-status').textContent = `✅ 參與者 (雲端已同步): ${participants.join(', ')}`;
-                document.getElementById('participant-status').style.color = '#5cb85c';
+                statusText.textContent = `✅ 參與者 (雲端已同步): ${participants.join(', ')}`;
+                statusText.style.color = '#5cb85c';
             } else {
-                document.getElementById('participant-status').textContent = `⚠️ 請設定參與者`;
-                document.getElementById('participant-status').style.color = '#d9534f';
+                statusText.textContent = `⚠️ 請設定參與者 (資料庫為空)`;
+                statusText.style.color = '#d9534f';
             }
-            // Re-calc report if participants changed
             generateReport();
         }
 
         function updatePayerDropdown() {
             const dropdown = document.getElementById('expense-payer');
-            const currentVal = dropdown.value; // Try to keep selection
+            const currentVal = dropdown.value; 
             dropdown.innerHTML = '';
             
             if (participants.length === 0) {
@@ -392,7 +427,6 @@
                 dropdown.appendChild(option);
             });
             
-            // If the previously selected person is still in the list, keep them selected
             if (participants.includes(currentVal)) {
                 dropdown.value = currentVal;
             }
@@ -413,7 +447,6 @@
                 const deleteCell = row.insertCell();
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '刪除';
-                // Pass the Firestore Document ID to the delete function
                 deleteButton.onclick = () => window.deleteExpense(exp.id);
                 deleteButton.style.cssText = 'background-color: #f0ad4e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;';
                 deleteCell.appendChild(deleteButton);
@@ -443,15 +476,12 @@
                 participantData[p] = { totalPaid: 0, balance: 0 };
             });
 
-            // 1. Calculate Total Paid
             expenses.forEach(exp => {
-                // Only count if payer is in current participant list
                 if (participantData[exp.payer]) {
                     participantData[exp.payer].totalPaid += exp.amount;
                 }
             });
 
-            // 2. Calculate Balance
             participants.forEach(p => {
                 const paid = participantData[p].totalPaid;
                 const balance = paid - perPersonShare;
@@ -475,7 +505,6 @@
                 }
             });
 
-            // 3. Generate Settlement Advice
             const balances = Object.entries(participantData).map(([name, data]) => ({ name, balance: data.balance }));
             const givers = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
             const takers = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
@@ -485,7 +514,6 @@
             while (givers.length > 0 && takers.length > 0) {
                 const giver = givers[0];
                 const taker = takers[0];
-                
                 const amountToSettle = Math.min(giver.balance, Math.abs(taker.balance)); 
                 
                 if (amountToSettle > 1) { 
@@ -495,7 +523,6 @@
                     listItem.style.marginBottom = '5px';
                     settlementList.appendChild(listItem);
                 }
-
                 giver.balance -= amountToSettle;
                 taker.balance += amountToSettle;
 
